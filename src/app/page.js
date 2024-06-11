@@ -1,95 +1,53 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client"
 
-export default function Home() {
+import { MainContext } from "@/contexts/MainContext"
+import { usersService } from "@/services/users.service"
+import { useRouter } from "next/navigation"
+import { useContext, useEffect, useState } from "react"
+
+const Login = () => {
+
+  const router = useRouter()
+
+  const context = useContext(MainContext)
+
+  const [user, setUser] = useState({ email: "", password: "" })
+
+  const handleLogin = async (data = { email: '', password: '' }) => {
+
+    try {
+
+      context.setIsLoading(true)
+      let response = await usersService.login(data)
+      console.log(response)
+
+      if (response._id) {
+        context.setUserData(response)
+        handleNavigate('/chamados')
+      }
+
+    } catch (error) {
+      console.log(error)
+    } finally {
+      context.setIsLoading(false)
+    }
+
+  }
+
+  const handleNavigate = (route = "/cadastro") => {
+    router.push(route)
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+    <div className="container">
+      <h2>Login</h2>
+      <input value={user.email} onChange={(e) => setUser({ ...user, email: e.target.value })} className="input-email" type="email" placeholder="Digite seu e-mail" />
+      <input value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })} className="input-password" type="password" placeholder="Digite sua senha" />
+      <button className="button-login" onClick={() => handleLogin(user)}>ENTRAR</button>
+      <button className="button-login" onClick={() => handleNavigate()}>CADASTRO</button>
+      {context.isLoading && <div>Aguarde, carregando...</div>}
+    </div>
+  )
 }
+
+export default Login
